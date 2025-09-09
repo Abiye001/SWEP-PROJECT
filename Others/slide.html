@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart RFID System Flowchart - HD</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            border: 2px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: white;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">Smart RFID-Based Student Verification System</div>
+    <div class="subtitle">Operational Flowchart - 1920x1080 @ 72 DPI</div>
+    
+    <canvas id="flowchartCanvas" width="1920" height="1080"></canvas>
+    
+    <div class="controls">
+        <button onclick="downloadPNG()">Download PNG</button>
+        <button onclick="downloadJPEG()">Download JPEG</button>
+        <button onclick="redrawFlowchart()">Redraw</button>
+        <button onclick="toggleGrid()">Toggle Grid</button>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #4CAF50;"></div>
+            <span>Start/End & Success</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2196F3;"></div>
+            <span>Process</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #FF9800;"></div>
+            <span>Decision</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #F44336;"></div>
+            <span>Error/Denial</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #9C27B0;"></div>
+            <span>Storage</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('flowchartCanvas');
+        const ctx = canvas.getContext('2d');
+        let showGrid = false;
+
+        // Set canvas to 72 DPI
+        const dpi = 72;
+        canvas.style.width = '960px';
+        canvas.style.height = '540px';
+
+        // Colors
+        const colors = {
+            startEnd: '#4CAF50',
+            process: '#2196F3',
+            decision: '#FF9800',
+            success: '#4CAF50',
+            error: '#F44336',
+            storage: '#9C27B0',
+            text: '#FFFFFF',
+            stroke: '#333333',
+            grid: '#E0E0E0',
+            background: '#FFFFFF'
+        };
+
+        function drawGrid() {
+            if (!showGrid) return;
+            
+            ctx.strokeStyle = colors.grid;
+            ctx.lineWidth = 0.5;
+            
+            // Vertical lines
+            for (let x = 0; x <= 1920; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 1080);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y <= 1080; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(1920, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawRoundedRect(x, y, width, height, radius, fillColor, strokeColor = colors.stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawDiamond(x, y, width, height, fillColor, strokeColor = colors.stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + width/2, y);
+            ctx.lineTo(x + width, y + height/2);
+            ctx.lineTo(x + width/2, y + height);
+            ctx.lineTo(x, y + height/2);
+            ctx.closePath();
+            
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawText(text, x, y, maxWidth = 140, fontSize = 12, color = colors.text, align = 'center') {
+            ctx.fillStyle = color;
+            ctx.font = `${fontSize}px Arial, sans-serif`;
+            ctx.textAlign = align;
+            ctx.textBaseline = 'middle';
+            
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = '';
+            
+            for (let word of words) {
+                const testLine = currentLine + word + ' ';
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > maxWidth && currentLine !== '') {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine.trim());
+            
+            const lineHeight = fontSize + 2;
+            const totalHeight = lines.length * lineHeight;
+            let startY = y - totalHeight/2 + lineHeight/2;
+            
+            for (let line of lines) {
+                ctx.fillText(line, x, startY);
+                startY += lineHeight;
+            }
+        }
+
+        function drawArrow(fromX, fromY, toX, toY, label = '') {
+            ctx.strokeStyle = colors.stroke;
+            ctx.lineWidth = 2;
+            
+            // Draw line
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            // Draw arrowhead
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const arrowLength = 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - arrowLength * Math.cos(angle - Math.PI/6),
+                toY - arrowLength * Math.sin(angle - Math.PI/6)
+            );
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - arrowLength * Math.cos(angle + Math.PI/6),
+                toY - arrowLength * Math.sin(angle + Math.PI/6)
+            );
+            ctx.stroke();
+            
+            // Draw label if provided
+            if (label) {
+                const midX = (fromX + toX) / 2;
+                const midY = (fromY + toY) / 2;
+                drawText(label, midX, midY, 80, 10, colors.stroke);
+            }
+        }
+
+        function drawFlowchart() {
+            // Clear canvas
+            ctx.fillStyle = colors.background;
+            ctx.fillRect(0, 0, 1920, 1080);
+            
+            drawGrid();
+            
+            // Title
+            drawText('Smart RFID-Based Student Verification System', 960, 30, 800, 20, colors.stroke);
+            drawText('Operational Flowchart', 960, 55, 600, 14, '#666666');
+            
+            // Node positions and dimensions
+            const nodeWidth = 160;
+            const nodeHeight = 60;
+            const diamondSize = 80;
+            
+            // Column positions
+            const col1 = 200;
+            const col2 = 400;
+            const col3 = 600;
+            const col4 = 800;
+            const col5 = 1000;
+            const col6 = 1200;
+            const col7 = 1400;
+            const col8 = 1600;
+            
+            // Row positions
+            const row1 = 100;
+            const row2 = 200;
+            const row3 = 300;
+            const row4 = 400;
+            const row5 = 500;
+            const row6 = 600;
+            const row7 = 700;
+            const row8 = 800;
+            const row9 = 900;
+            const row10 = 1000;
+            
+            // Draw nodes
+            
+            // Start
+            drawRoundedRect(col1, row1, nodeWidth, nodeHeight, 15, colors.startEnd);
+            drawText('System Power On', col1 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            // Initialization chain
+            drawRoundedRect(col2, row1, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Initialize ESP32', col2 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            drawRoundedRect(col3, row1, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Initialize RFID RC522', col3 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            drawRoundedRect(col4, row1, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Initialize Fingerprint Sensor', col4 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            drawRoundedRect(col5, row1, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Initialize LCD & Indicators', col5 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            // WiFi check
+            drawRoundedRect(col6, row1, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Check Wi-Fi Connection', col6 + nodeWidth/2, row1 + nodeHeight/2);
+            
+            drawDiamond(col7, row1, diamondSize, diamondSize, colors.decision);
+            drawText('Wi-Fi Connected?', col7 + diamondSize/2, row1 + diamondSize/2, 70, 10);
+            
+            // Sync paths
+            drawRoundedRect(col7, row2, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Sync with Database', col7 + nodeWidth/2, row2 + nodeHeight/2);
+            
+            drawRoundedRect(col8, row2, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Continue Offline Mode', col8 + nodeWidth/2, row2 + nodeHeight/2);
+            
+            // System ready
+            drawRoundedRect(col7, row3, nodeWidth, nodeHeight, 15, colors.startEnd);
+            drawText('System Ready Display Welcome', col7 + nodeWidth/2, row3 + nodeHeight/2);
+            
+            // Main loop
+            drawRoundedRect(col7, row4, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Wait for RFID Card', col7 + nodeWidth/2, row4 + nodeHeight/2);
+            
+            drawDiamond(col7, row5, diamondSize, diamondSize, colors.decision);
+            drawText('RFID Detected?', col7 + diamondSize/2, row5 + diamondSize/2, 70, 10);
+            
+            // RFID processing
+            drawRoundedRect(col6, row6, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Read RFID UID', col6 + nodeWidth/2, row6 + nodeHeight/2);
+            
+            drawDiamond(col5, row6, diamondSize, diamondSize, colors.decision);
+            drawText('Valid UID?', col5 + diamondSize/2, row6 + diamondSize/2, 60, 10);
+            
+            // Fingerprint path
+            drawRoundedRect(col4, row6, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Request Fingerprint', col4 + nodeWidth/2, row6 + nodeHeight/2);
+            
+            drawDiamond(col3, row6, diamondSize, diamondSize, colors.decision);
+            drawText('Fingerprint Match?', col3 + diamondSize/2, row6 + diamondSize/2, 70, 10);
+            
+            // Success path
+            drawRoundedRect(col2, row6, nodeWidth, nodeHeight, 15, colors.success);
+            drawText('Access Granted Unlock Door', col2 + nodeWidth/2, row6 + nodeHeight/2);
+            
+            drawRoundedRect(col1, row6, nodeWidth, nodeHeight, 15, colors.success);
+            drawText('Log Entry Timestamp', col1 + nodeWidth/2, row6 + nodeHeight/2);
+            
+            // Failure path
+            drawRoundedRect(col5, row7, nodeWidth, nodeHeight, 15, colors.error);
+            drawText('Access Denied Alert', col5 + nodeWidth/2, row7 + nodeHeight/2);
+            
+            drawRoundedRect(col6, row7, nodeWidth, nodeHeight, 15, colors.error);
+            drawText('Log Failed Attempt', col6 + nodeWidth/2, row7 + nodeHeight/2);
+            
+            // Data sync
+            drawDiamond(col1, row7, diamondSize, diamondSize, colors.decision);
+            drawText('Wi-Fi Available?', col1 + diamondSize/2, row7 + diamondSize/2, 70, 10);
+            
+            drawRoundedRect(col1, row8, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Send to Cloud Database', col1 + nodeWidth/2, row8 + nodeHeight/2);
+            
+            drawRoundedRect(col2, row8, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Store Locally Queue Sync', col2 + nodeWidth/2, row8 + nodeHeight/2);
+            
+            // Return to main loop
+            drawRoundedRect(col7, row8, nodeWidth, nodeHeight, 15, colors.process);
+            drawText('Wait 3 Seconds Reset', col7 + nodeWidth/2, row8 + nodeHeight/2);
+            
+            // Security features
+            drawRoundedRect(col3, row9, nodeWidth, nodeHeight, 15, colors.error);
+            drawText('Failed Attempts Counter', col3 + nodeWidth/2, row9 + nodeHeight/2);
+            
+            drawDiamond(col4, row9, diamondSize, diamondSize, colors.decision);
+            drawText('Max Attempts?', col4 + diamondSize/2, row9 + diamondSize/2, 70, 10);
+            
+            drawRoundedRect(col5, row9, nodeWidth, nodeHeight, 15, colors.error);
+            drawText('Temporary Lockout', col5 + nodeWidth/2, row9 + nodeHeight/2);
+            
+            // Background sync
+            drawRoundedRect(col1, row10, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Background Sync Process', col1 + nodeWidth/2, row10 + nodeHeight/2);
+            
+            drawRoundedRect(col2, row10, nodeWidth, nodeHeight, 15, colors.storage);
+            drawText('Monitor Connection', col2 + nodeWidth/2, row10 + nodeHeight/2);
+            
+            // Draw arrows
+            drawArrow(col1 + nodeWidth, row1 + nodeHeight/2, col2, row1 + nodeHeight/2);
+            drawArrow(col2 + nodeWidth, row1 + nodeHeight/2, col3, row1 + nodeHeight/2);
+            drawArrow(col3 + nodeWidth, row1 + nodeHeight/2, col4, row1 + nodeHeight/2);
+            drawArrow(col4 + nodeWidth, row1 + nodeHeight/2, col5, row1 + nodeHeight/2);
+            drawArrow(col5 + nodeWidth, row1 + nodeHeight/2, col6, row1 + nodeHeight/2);
+            drawArrow(col6 + nodeWidth, row1 + nodeHeight/2, col7 + diamondSize/2, row1 + diamondSize/2);
+            
+            // WiFi decision arrows
+            drawArrow(col7 + diamondSize/2, row1 + diamondSize, col7 + nodeWidth/2, row2, 'Yes');
+            drawArrow(col7 + diamondSize, row1 + diamondSize/2, col8, row2 + nodeHeight/2, 'No');
+            
+            // Convergence to ready
+            drawArrow(col7 + nodeWidth/2, row2 + nodeHeight, col7 + nodeWidth/2, row3);
+            drawArrow(col8, row2 + nodeHeight/2, col7 + nodeWidth/2, row3 + nodeHeight/2);
+            
+            // Main flow
+            drawArrow(col7 + nodeWidth/2, row3 + nodeHeight, col7 + nodeWidth/2, row4);
+            drawArrow(col7 + nodeWidth/2, row4 + nodeHeight, col7 + diamondSize/2, row5);
+            
+            // Loop back
+            drawArrow(col7 - 20, row5 + diamondSize/2, col7 - 20, row4 + nodeHeight/2, 'No');
+            
+            // RFID processing
+            drawArrow(col7 + diamondSize/2, row5 + diamondSize, col6 + nodeWidth/2, row6, 'Yes');
+            drawArrow(col6, row6 + nodeHeight/2, col5 + diamondSize, row6 + diamondSize/2);
+            
+            // Fingerprint path
+            drawArrow(col5 + diamondSize/2, row6 + diamondSize/2, col4 + nodeWidth/2, row6 + nodeHeight/2, 'Yes');
+            drawArrow(col4, row6 + nodeHeight/2, col3 + diamondSize, row6 + diamondSize/2);
+            
+            // Success
+            drawArrow(col3 + diamondSize/2, row6 + diamondSize/2, col2 + nodeWidth/2, row6 + nodeHeight/2, 'Yes');
+            drawArrow(col2, row6 + nodeHeight/2, col1 + nodeWidth/2, row6 + nodeHeight/2);
+            
+            // Failure
+            drawArrow(col5 + diamondSize/2, row6 + diamondSize, col5 + nodeWidth/2, row7, 'No');
+            drawArrow(col5 + nodeWidth, row7 + nodeHeight/2, col6, row7 + nodeHeight/2);
+            
+            // Data handling
+            drawArrow(col1 + nodeWidth/2, row6 + nodeHeight, col1 + diamondSize/2, row7);
+            drawArrow(col1 + diamondSize/2, row7 + diamondSize, col1 + nodeWidth/2, row8, 'Yes');
+            drawArrow(col1 + diamondSize, row7 + diamondSize/2, col2, row8 + nodeHeight/2, 'No');
+            
+            // Return paths
+            drawArrow(col1 + nodeWidth/2, row8 + nodeHeight, col7 + nodeWidth/2, row8 + nodeHeight/2);
+            drawArrow(col2 + nodeWidth/2, row8 + nodeHeight, col7 + nodeWidth/2, row8 + nodeHeight/2);
+            drawArrow(col6 + nodeWidth/2, row7 + nodeHeight, col7 + nodeWidth/2, row8 + nodeHeight/2);
+            drawArrow(col7 + nodeWidth/2, row8, col7 + nodeWidth/2, row4 + nodeHeight);
+            
+            // Security flow
+            drawArrow(col3 + diamondSize/2, row6 + diamondSize, col3 + nodeWidth/2, row9, 'No');
+            drawArrow(col3 + nodeWidth, row9 + nodeHeight/2, col4 + diamondSize/2, row9 + diamondSize/2);
+            drawArrow(col4 + diamondSize, row9 + diamondSize/2, col5, row9 + nodeHeight/2, 'Yes');
+            drawArrow(col5 + nodeWidth/2, row9 + nodeHeight, col7 + nodeWidth/2, row8 + nodeHeight);
+            
+            // Background processes
+            drawArrow(col1 + nodeWidth, row10 + nodeHeight/2, col2, row10 + nodeHeight/2);
+        }
+
+        function downloadPNG() {
+            const link = document.createElement('a');
+            link.download = 'Smart_RFID_System_Flowchart_1920x1080.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadJPEG() {
+            // Create white background for JPEG
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 1920;
+            tempCanvas.height = 1080;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCtx.fillStyle = '#FFFFFF';
+            tempCtx.fillRect(0, 0, 1920, 1080);
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = 'Smart_RFID_System_Flowchart_1920x1080.jpg';
+            link.href = tempCanvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+        }
+
+        function redrawFlowchart() {
+            drawFlowchart();
+        }
+
+        function toggleGrid() {
+            showGrid = !showGrid;
+            drawFlowchart();
+        }
+
+        // Initial draw
+        drawFlowchart();
+
+        // Add context menu for right-click save
+        canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
