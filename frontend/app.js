@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3050/api';
 let authToken = null;
 
 // API Helper Class
@@ -31,7 +31,6 @@ class ApiClient {
             const response = await fetch(url, config);
             let data;
             
-            // Handle different content types
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 data = await response.json();
@@ -47,9 +46,8 @@ class ApiClient {
         } catch (error) {
             console.error('API request failed:', error);
             
-            // Handle network errors
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('Unable to connect to server. Please ensure the backend is running on http://localhost:3000');
+                throw new Error('Unable to connect to server. Please ensure the backend is running on http://localhost:3050');
             }
             
             throw error;
@@ -65,17 +63,6 @@ class ApiClient {
             method: 'POST', 
             body: data 
         });
-    }
-
-    async put(endpoint, data) {
-        return this.request(endpoint, { 
-            method: 'PUT', 
-            body: data 
-        });
-    }
-
-    async delete(endpoint) {
-        return this.request(endpoint, { method: 'DELETE' });
     }
 
     setToken(token) {
@@ -98,6 +85,98 @@ let authenticatedFingerprint = false;
 let registeredFingerprintData = null;
 let authenticatedFingerprintData = null;
 
+// Department mappings by faculty
+const departmentsByFaculty = {
+    technology: [
+        'agricultural_engineering',
+        'building',
+        'chemical_engineering',
+        'civil_engineering',
+        'computer_engineering',
+        'electrical/electronics_engineering',
+        'engineering_physics',
+        'mechanical_engineering',
+        'metallurgical_and_material_engineering'
+    ],
+    science: [
+        'applied_geophysics',
+        'biochemistry',
+        'chemistry',
+        'geology',
+        'industrial_chemistry',
+        'mathematics',
+        'microbiology',
+        'physics',
+        'statistics',
+        'zoology'
+    ],
+    computing: [
+        'computer_science',
+        'computer_science_with_economics',
+        'computer_science_with_mathematics',
+        'computer_science_with_economics_mathematics'
+    ],
+    arts: [
+        'english_language',
+        'history',
+        'philosophy',
+        'religious_studies',
+        'music',
+        'drama/dramatic/performing_arts'
+    ],
+    health_sciences: [
+        'medicine_and_surgery',
+        'medical_rehabilitation',
+        'nursing/nursing_science'
+    ],
+    law: ['law'],
+    pharmacy: ['pharmacy'],
+    social_sciences: [
+        'economics',
+        'political_science',
+        'psychology',
+        'sociology_and_anthropology',
+        'geography'
+    ],
+    education: [
+        'education_and_mathematics',
+        'education_and_english_language',
+        'education_and_biology',
+        'physical_and_health_education'
+    ],
+    agriculture: [
+        'crop_production_and_protection',
+        'animal_science',
+        'agricultural_economics',
+        'food_science_and_technology'
+    ],
+    environmental_design_and_management: [
+        'architecture',
+        'urban_and_regional_planning',
+        'estate_management',
+        'quantity_surveying'
+    ],
+    dentistry: ['dentistry_and_dental_surgery'],
+    administration: [
+        'accounting',
+        'public_administration',
+        'local_government_studies'
+    ],
+    business: ['business_administration']
+};
+
+// Connection status management
+function updateConnectionStatus(isOnline) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (isOnline) {
+        statusElement.textContent = 'Backend Connected';
+        statusElement.className = 'connection-status connection-online';
+    } else {
+        statusElement.textContent = 'Backend Offline';
+        statusElement.className = 'connection-status connection-offline';
+    }
+}
+
 // Backend connection test
 async function checkBackendConnection() {
     try {
@@ -117,23 +196,100 @@ async function testConnection() {
     if (isConnected) {
         showAlert('Backend connection successful!', 'success');
     } else {
-        showAlert('Backend connection failed. Please ensure the server is running on http://localhost:3000', 'error');
+        showAlert('Backend connection failed. Please ensure the server is running on http://localhost:3050', 'error');
     }
 }
 
-// Connection status management
-function updateConnectionStatus(isOnline) {
-    const statusElement = document.getElementById('connectionStatus');
-    if (isOnline) {
-        statusElement.textContent = 'Backend Connected';
-        statusElement.className = 'connection-status connection-online';
+// Update departments based on selected faculty
+function updateDepartments() {
+    const facultySelect = document.getElementById('faculty');
+    const departmentSelect = document.getElementById('department');
+    const selectedFaculty = facultySelect.value;
+
+    departmentSelect.innerHTML = '<option value="">Select Department</option>';
+
+    if (selectedFaculty && departmentsByFaculty[selectedFaculty]) {
+        const departments = departmentsByFaculty[selectedFaculty];
+        departments.forEach(department => {
+            const option = document.createElement('option');
+            option.value = department;
+            option.textContent = department.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            departmentSelect.appendChild(option);
+        });
+        departmentSelect.disabled = false;
     } else {
-        statusElement.textContent = 'Backend Offline';
-        statusElement.className = 'connection-status connection-offline';
+        departmentSelect.innerHTML = '<option value="">Select Faculty First</option>';
+        departmentSelect.disabled = true;
     }
 }
 
-// RFID scan function
+// Navigation functions
+function showHome() {
+    hideAllPages();
+    document.getElementById('homePage').classList.remove('hidden');
+}
+
+function showRegistration(role) {
+    hideAllPages();
+    document.getElementById('registrationPage').classList.remove('hidden');
+    document.getElementById('userRole').value = role;
+    document.getElementById('registrationTitle').textContent = 
+        role === 'student' ? 'Student Registration' : 'Teacher Registration';
+    
+    registeredFingerprint = false;
+    registeredFingerprintData = null;
+    resetFingerprintStatus();
+    
+    if (role === 'student') {
+        document.getElementById('studentFields').classList.remove('hidden');
+        document.getElementById('teacherFields').classList.add('hidden');
+        document.getElementById('matricNumber').required = true;
+        document.getElementById('faculty').required = true;
+        document.getElementById('department').required = true;
+        document.getElementById('staffId').required = false;
+        document.getElementById('designation').required = false;
+    } else {
+        document.getElementById('studentFields').classList.add('hidden');
+        document.getElementById('teacherFields').classList.remove('hidden');
+        document.getElementById('matricNumber').required = false;
+        document.getElementById('faculty').required = false;
+        document.getElementById('department').required = false;
+        document.getElementById('staffId').required = true;
+        document.getElementById('designation').required = true;
+    }
+    
+    updateDepartments();
+}
+
+function showLogin() {
+    hideAllPages();
+    document.getElementById('loginPage').classList.remove('hidden');
+    authenticatedFingerprint = false;
+    authenticatedFingerprintData = null;
+    resetLoginFingerprintStatus();
+}
+
+function showTeacherDashboard() {
+    hideAllPages();
+    document.getElementById('teacherDashboard').classList.remove('hidden');
+    document.getElementById('logoutBtn').style.display = 'inline-block';
+    
+    if (currentUser) {
+        document.getElementById('welcomeMessage').textContent = 
+            `Welcome, ${currentUser.fullName || currentUser.email}!`;
+    }
+    
+    loadDashboardData();
+}
+
+function hideAllPages() {
+    const pages = ['homePage', 'registrationPage', 'loginPage', 'teacherDashboard'];
+    pages.forEach(pageId => {
+        document.getElementById(pageId).classList.add('hidden');
+    });
+}
+
+// RFID and Fingerprint functions
 async function scanRFID() {
     try {
         const response = await api.post('/simulate/rfid-scan');
@@ -145,7 +301,6 @@ async function scanRFID() {
     }
 }
 
-// Helper function for fingerprint overlay
 function createFingerprintOverlay() {
     return new Promise((resolve, reject) => {
         let fingerDetected = false;
@@ -206,7 +361,6 @@ function createFingerprintOverlay() {
     });
 }
 
-// Register fingerprint function
 async function registerFingerprint() {
     const statusElement = document.getElementById('fingerprintStatus');
     const buttonElement = document.getElementById('fingerprintBtn');
@@ -245,7 +399,6 @@ async function registerFingerprint() {
     }
 }
 
-// Authenticate fingerprint function
 async function authenticateFingerprint() {
     const statusElement = document.getElementById('loginFingerprintStatus');
     const buttonElement = document.getElementById('loginFingerprintBtn');
@@ -284,7 +437,6 @@ async function authenticateFingerprint() {
     }
 }
 
-// Reset fingerprint status functions
 function resetFingerprintStatus() {
     const statusElement = document.getElementById('fingerprintStatus');
     const buttonElement = document.getElementById('fingerprintBtn');
@@ -470,7 +622,6 @@ function updateAttendanceTable(attendanceData) {
     });
 }
 
-// Logout function
 async function logout() {
     try {
         if (authToken) {
@@ -507,3 +658,39 @@ async function testAttendanceVerification() {
         showAlert('Attendance verification failed: ' + error.message, 'error');
     }
 }
+
+// Alert system
+function showAlert(message, type = 'info') {
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing application...');
+    
+    // Check backend connection
+    checkBackendConnection();
+    
+    // Setup form handlers
+    document.getElementById('registrationForm').addEventListener('submit', handleRegistration);
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    
+    // Start at home page
+    showHome();
+    
+    console.log('Application initialized successfully');
+});

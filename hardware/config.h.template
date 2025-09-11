@@ -1,0 +1,64 @@
+/*
+ * ESP32 RFID + Fingerprint Access Control System Configuration
+ * 
+ * IMPORTANT: Copy this file to config.h and update with your actual values
+ * Never commit config.h to version control for security reasons
+ */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// WiFi Configuration - CHANGE THESE!
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Server Configuration - Update with your server's IP address
+#define SERVER_URL "http://192.168.1.100:3050/api/"
+
+// Device Configuration
+#define DEVICE_ID "ESP32_001"
+#define DEVICE_LOCATION "Main Entrance"
+
+// Pin Definitions (Match your PCB wiring)
+#define RST_PIN         27  // MFRC522 RST
+#define SS_PIN          5   // MFRC522 SDA
+#define FINGERPRINT_RX  16  // R307 TX  
+#define FINGERPRINT_TX  17  // R307 RX
+#define BUZZER_PIN      26  // Active Buzzer
+#define GREEN_LED       12  // Green LED
+#define RED_LED         13  // Red LED
+#define RELAY_PIN       32  // Relay control
+#define BUTTON_PIN      0   // Push button (GPIO0)
+
+// SPI pins for MFRC522 (ESP32 default SPI)
+#define SCK_PIN         18
+#define MOSI_PIN        23
+#define MISO_PIN        19
+
+// I2C pins for LCD
+#define SDA_PIN         21
+#define SCL_PIN         22
+
+// LCD Configuration
+#define LCD_ADDRESS     0x27  // Try 0x3F if 0x27 doesn't work
+#define LCD_COLUMNS     16
+#define LCD_ROWS        2
+
+// Timing Configuration
+#define CARD_READ_DELAY     2000    // Prevent multiple reads (ms)
+#define WIFI_CHECK_INTERVAL 30000   // WiFi check interval (ms) 
+#define SYNC_INTERVAL       300000  // Data sync interval (ms)
+#define DOOR_OPEN_TIME      3000    // Door unlock duration (ms)
+#define FINGERPRINT_TIMEOUT 5000    // Fingerprint scan timeout (ms)
+#define BUTTON_DEBOUNCE     50      // Button debounce delay (ms)
+
+// Network Configuration
+#define WIFI_CONNECT_TIMEOUT 20000  // WiFi connection timeout (ms)
+#define HTTP_TIMEOUT         10000  // HTTP request timeout (ms)
+
+// System Configuration
+#define SERIAL_BAUD_RATE     115200
+#define FINGERPRINT_BAUD     57600
+#define MAX_FINGERPRINT_ATTEMPTS 3
+
+#endif // CONFIG_H

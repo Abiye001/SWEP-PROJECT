@@ -1,0 +1,29 @@
+{
+  "name": "smart-verification-frontend",
+  "version": "1.0.0",
+  "description": "Frontend web application for Smart Verification System",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1 --cors",
+    "serve": "python3 -m http.server 8080",
+    "dev": "npx live-server --port=8080 --cors",
+    "build": "echo 'Frontend build complete'",
+    "lint": "echo 'Linting frontend files'"
+  },
+  "keywords": [
+    "rfid",
+    "fingerprint",
+    "frontend",
+    "authentication",
+    "web"
+  ],
+  "author": "SWEP Project Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.0.0",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
