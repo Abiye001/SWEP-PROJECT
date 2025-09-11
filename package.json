@@ -1,0 +1,38 @@
+{
+  "name": "smart-verification-system",
+  "version": "1.0.0",
+  "description": "RFID + Fingerprint Verification System for Campus Access Control",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:dev": "cd backend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "test": "cd backend && npm test",
+    "build": "echo 'Building project...' && npm run install:all"
+  },
+  "keywords": [
+    "rfid",
+    "fingerprint",
+    "authentication",
+    "access-control",
+    "campus",
+    "security",
+    "esp32",
+    "nodejs"
+  ],
+  "author": "SWEP Project Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Abiye001/SWEP-PROJECT.git"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}

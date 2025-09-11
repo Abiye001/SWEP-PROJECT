@@ -1,0 +1,334 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #ffffff;
+    background: url('cyber-security-concept-digital-art(2).jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.nav {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem 0;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(2, 84, 216, 0.3);
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #0254d8;
+    text-shadow: 0 0 10px rgba(2, 84, 216, 0.3);
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-size: 14px;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #0254d8, #0040a8);
+    color: white;
+    border: 2px solid #0254d8;
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #5a6268);
+    color: white;
+    border: 2px solid #6c757d;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    color: white;
+    border: 2px solid #dc3545;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.card {
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(2, 84, 216, 0.2);
+}
+
+/* Registration and Login cards: white with dark text */
+#registrationPage.card,
+#loginPage.card {
+    background: rgba(255, 255, 255, 0.95);
+    color: #222;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    border: 1px solid #e1e8ed;
+}
+
+#registrationPage.card label,
+#registrationPage.card h2,
+#loginPage.card label,
+#loginPage.card h2 {
+    color: #0254d8;
+}
+
+#registrationPage.card input,
+#registrationPage.card select,
+#loginPage.card input,
+#loginPage.card select {
+    background-color: #f8f9fa;
+    color: #222;
+    border: 2px solid #e1e8ed;
+}
+
+#registrationPage.card input:focus,
+#registrationPage.card select:focus,
+#loginPage.card input:focus,
+#loginPage.card select:focus {
+    border-color: #0254d8;
+    box-shadow: 0 0 10px rgba(2, 84, 216, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #0254d8;
+    box-shadow: 0 0 10px rgba(2, 84, 216, 0.3);
+}
+
+.hidden {
+    display: none;
+}
+
+.role-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.role-card {
+    background: linear-gradient(135deg, #0254d8, #003d9e);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s;
+    border: 2px solid rgba(2, 84, 216, 0.3);
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(2, 84, 216, 0.4);
+}
+
+.role-card.teacher {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: 2px solid rgba(108, 117, 125, 0.3);
+}
+
+.fingerprint-status {
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: bold;
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-processing {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #0254d8, #003d9e);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.attendance-table th, .attendance-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+    color: #ffffff;
+}
+
+.attendance-table th {
+    background-color: #0254d8;
+    font-weight: bold;
+}
+
+.alert {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 10px;
+    border-left: 5px solid;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.alert-success {
+    background-color: rgba(212, 237, 218, 0.1);
+    border-left-color: #28a745;
+    color: #28a745;
+}
+
+.alert-error {
+    background-color: rgba(248, 215, 218, 0.1);
+    border-left-color: #dc3545;
+    color: #dc3545;
+}
+
+.alert-info {
+    background-color: rgba(217, 237, 247, 0.1);
+    border-left-color: #17a2b8;
+    color: #17a2b8;
+}
+
+.connection-status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 1000;
+}
+
+.connection-online {
+    background-color: #28a745;
+    color: white;
+}
+
+.connection-offline {
+    background-color: #dc3545;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .role-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
