@@ -29,6 +29,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use(express.static("public"));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve("public", "index.html"));
+});
+
+
 // Inject JWT secret into auth routes
 app.use('/api', (req, res, next) => {
     req.jwtSecret = JWT_SECRET;

@@ -8,44 +8,6 @@ const initializeSampleData = () => {
     // Sample teacher users
     const teacherFingerprint1 = 'teacher_fingerprint_1';
     const teacherFingerprint2 = 'teacher_fingerprint_2';
-    
-    users.set('john.smith@university.edu', {
-        id: 'teacher_001',
-        fullName: 'Prof. John Smith',
-        email: 'john.smith@university.edu',
-        role: 'teacher',
-        staffId: 'STAFF001',
-        designation: 'professor',
-        rfidCardUID: 'RFID_TEACHER_001',
-        fingerprintData: teacherFingerprint1,
-        createdAt: new Date()
-    });
-
-    users.set('sarah.johnson@university.edu', {
-        id: 'teacher_002',
-        fullName: 'Dr. Sarah Johnson',
-        email: 'sarah.johnson@university.edu',
-        role: 'teacher',
-        staffId: 'STAFF002',
-        designation: 'lecturer',
-        rfidCardUID: 'RFID_TEACHER_002',
-        fingerprintData: teacherFingerprint2,
-        createdAt: new Date()
-    });
-
-    // Sample student users
-    users.set('student1@university.edu', {
-        id: 'student_001',
-        fullName: 'Alice Johnson',
-        email: 'student1@university.edu',
-        role: 'student',
-        matricNumber: 'CSC/2024/001',
-        faculty: 'computing',
-        department: 'computer_science',
-        rfidCardUID: 'RFID101',
-        fingerprintData: 'student_fingerprint_1',
-        createdAt: new Date()
-    });
 
     users.set('student2@university.edu', {
         id: 'student_002',

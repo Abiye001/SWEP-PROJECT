@@ -29,9 +29,9 @@
 #define SCL_PIN         22
 
 // Network Credentials - CHANGE THESE!
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* serverURL = "http://192.168.1.100:3050/api/"; // Change to your server IP
+const char* ssid = "Virus 🦠☣️👾👾";
+const char* password = "just'419";
+const char* serverURL = "http://192.168.104.201:3050/api";// Change to your server IP
 
 // Device Configuration
 const String DEVICE_ID = "ESP32_001";
