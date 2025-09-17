@@ -1,14 +1,16 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const dotenv = require('dotenv');
 
-// Load configuration
-const { loadEnvironmentFromIni, getConfig } = require('./config');
-loadEnvironmentFromIni();
-const config = getConfig();
+// Load environment variables
+dotenv.config();
 
-// Import modules
-const { initializeSampleData, findUserByRFID, findUserByFingerprint, attendanceRecords } = require('./dataStore');
+// Import MongoDB connection
+// const connectDB = require('./db');
+
+// Middleware
 const { authenticateToken, errorHandler } = require('./middleware');
 
 // Import routes
@@ -19,94 +21,80 @@ const attendanceRoutes = require('./routes/attendance');
 const simulateRoutes = require('./routes/simulate');
 
 const app = express();
-const PORT = config.port;
-const JWT_SECRET = config.jwtSecret;
+const PORT = process.env.PORT || 3050;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// ✅ Connect to MongoDB (with error handling)
+// connectDB().catch((err) => {
+//   console.error("❌ MongoDB connection failed:", err.message);
+//   process.exit(1);
+// });
 
 // Middleware
 app.use(cors({
-    origin: config.corsOrigin,
-    credentials: true
+  origin: process.env.CORS_ORIGIN?.split(',') || '*',
+  credentials: true
 }));
 app.use(express.json());
 
-app.use(express.static("public"));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve("public", "index.html"));
-});
-
-
-// Inject JWT secret into auth routes
+// ✅ API routes first (backend only)
 app.use('/api', (req, res, next) => {
-    req.jwtSecret = JWT_SECRET;
-    next();
+  req.jwtSecret = JWT_SECRET;
+  next();
 });
 
-// Initialize sample data on startup
-initializeSampleData();
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Backend server is running',
+    timestamp: new Date(),
+    version: '2.0.0',
+    environment: process.env.NODE_ENV
+  });
+});
 
 // Routes
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        message: 'Backend server is running',
-        timestamp: new Date(),
-        version: '2.0.0',
-        environment: config.nodeEnv
-    });
-});
-
-// Authentication routes
 app.use('/api', authRoutes);
-
-// ESP32 specific routes
 app.use('/api', esp32Routes);
-
-// Attendance routes
 app.use('/api', attendanceRoutes);
-
-// Simulation routes (for development/testing)
 app.use('/api/simulate', simulateRoutes);
-
-// Dashboard routes (protected)
 app.use('/api/dashboard', authenticateToken(JWT_SECRET), dashboardRoutes);
-
-// Protected user management routes
-app.get('/api/users', authenticateToken(JWT_SECRET), dashboardRoutes);
-app.get('/api/attendance', authenticateToken(JWT_SECRET), dashboardRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
 
+// ✅ Serve frontend AFTER API routes
+const frontendPath = path.join(__dirname, 'public');
+app.use(express.static(frontendPath));
+
+// Catch-all: only for frontend routes (not /api/*)
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+    if (err) {
+      console.error("❌ Error sending index.html:", err.message);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+});
+
 // Start server
-app.listen(PORT, '0.0.0.0', () => {  // Listen on all interfaces for ESP32 access
-    console.log('=================================');
-    console.log('🚀 Smart Verification System API');
-    console.log(`📡 Server running on http://0.0.0.0:${PORT}`);
-    console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔧 Environment: ${config.nodeEnv}`);
-    console.log('=================================');
-    console.log('🔧 ESP32 Endpoints:');
-    console.log(`  • POST /api/verify-rfid`);
-    console.log(`  • POST /api/log-attendance`);
-    console.log(`  • POST /api/device/register`);
-    console.log('=================================');
-    console.log('📊 Sample RFID Cards for Testing:');
-    console.log('👨‍🏫 Teachers:');
-    console.log('  • RFID_TEACHER_001 → Prof. John Smith');
-    console.log('  • RFID_TEACHER_002 → Dr. Sarah Johnson');
-    console.log('👨‍🎓 Students:');
-    console.log('  • RFID101 → Alice Johnson');
-    console.log('  • RFID102 → Bob Wilson');
-    console.log('  • 04A1B2C3 → Charlie Brown');
-    console.log('  • 04D5E6F7 → Diana Prince');
-    console.log('=================================');
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('=================================');
+  console.log('🚀 Smart Verification System API');
+  console.log(`📡 Server running on http://0.0.0.0:${PORT}`);
+  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🌐 Frontend served from: ${frontendPath}`);
+  console.log('=================================');
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-    console.log('\n👋 Shutting down server gracefully...');
-    process.exit(0);
+  console.log('\n👋 Shutting down server gracefully...');
+  process.exit(0);
 });
 
 module.exports = app;
