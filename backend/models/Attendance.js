@@ -1,14 +1,27 @@
-const mongoose = require('mongoose');
+// models/Attendance.js
+const db = require('../db');
 
-const attendanceSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true }, // UUID
-  user_id: { type: String, required: true }, // links to User.id
-  rfid_uid: { type: String, required: true },
-  action: { type: String, enum: ['ENTRY', 'EXIT'], default: 'ENTRY' },
-  location: { type: String, default: 'Unknown Device' },
-  device_id: { type: String },
-  timestamp: { type: Date, default: Date.now },
-  verified: { type: Boolean, default: true }
-}, { timestamps: true });
+class Attendance {
+  static create(record) {
+    const stmt = db.prepare(`
+      INSERT INTO attendance (
+        id, user_id, rfid_uid, action, location, device_id, verified
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      record.id,
+      record.user_id,
+      record.rfid_uid,
+      record.action || 'ENTRY',
+      record.location || 'Unknown Device',
+      record.device_id || null,
+      record.verified ? 1 : 0
+    );
+  }
 
-module.exports = mongoose.model('Attendance', attendanceSchema);
+  static findByUser(user_id) {
+    return db.prepare('SELECT * FROM attendance WHERE user_id = ?').all(user_id);
+  }
+}
+
+module.exports = Attendance;
