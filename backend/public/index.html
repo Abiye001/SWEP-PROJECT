@@ -66,30 +66,98 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="faculty">Faculty</label>
-                        <select id="faculty" name="faculty" onchange="updateDepartments()">
-                            <option value="">Select Faculty</option>
-                            <option value="technology">Technology</option>
-                            <option value="science">Science</option>
-                            <option value="arts">Arts</option>
-                            <option value="health_sciences">Health Sciences</option>
-                            <option value="pharmacy">Pharmacy</option>
-                            <option value="law">Law</option>
-                            <option value="social_sciences">Social Sciences</option>
-                            <option value="education">Education</option>
-                            <option value="computing">Computing</option>
-                            <option value="agriculture">Agriculture</option>
-                            <option value="environmental_design_and_management">Environmental Design and Management</option>
-                            <option value="dentistry">Dentistry</option>
-                            <option value="administration">Administration</option>
-                            <option value="business">Business</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="department">Department</label>
-                        <select id="department" name="department">
-                            <option value="">Select Faculty First</option>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="ACCOUNTING">ACCOUNTING</option>
+                            <option value="ADULT EDUCATION">ADULT EDUCATION</option>
+                            <option value="AGRIC EXTENSION AND RURAL DEVELOPMENT">AGRIC EXTENSION AND RURAL DEVELOPMENT</option>
+                            <option value="AGRICULTURAL ECONOMICS">AGRICULTURAL ECONOMICS</option>
+                            <option value="AGRICULTURAL ENGINEERING">AGRICULTURAL ENGINEERING</option>
+                            <option value="ANIMAL SCIENCE">ANIMAL SCIENCE</option>
+                            <option value="APPLIED GEOPHYSICS">APPLIED GEOPHYSICS</option>
+                            <option value="ARCHITECTURE">ARCHITECTURE</option>
+                            <option value="BIOCHEMISTRY">BIOCHEMISTRY</option>
+                            <option value="BUILDING">BUILDING</option>
+                            <option value="CHEMICAL ENGINEERING">CHEMICAL ENGINEERING</option>
+                            <option value="CHEMISTRY">CHEMISTRY</option>
+                            <option value="CIVIL ENGINEERING">CIVIL ENGINEERING</option>
+                            <option value="COMPUTER ENGINEERING">COMPUTER ENGINEERING</option>
+                            <option value="COMPUTER SCIENCE">COMPUTER SCIENCE</option>
+                            <option value="COMPUTER SCIENCE WITH ECONOMICS">COMPUTER SCIENCE WITH ECONOMICS</option>
+                            <option value="COMPUTER SCIENCE WITH ECONOMICS MATHEMATICS">COMPUTER SCIENCE WITH ECONOMICS MATHEMATICS</option>
+                            <option value="COMPUTER SCIENCE WITH MATHEMATICS">COMPUTER SCIENCE WITH MATHEMATICS</option>
+                            <option value="CROP PRODUCTION AND PROTECTION">CROP PRODUCTION AND PROTECTION</option>
+                            <option value="DEMOGRAPHY AND SOCIAL STATISTICS">DEMOGRAPHY AND SOCIAL STATISTICS</option>
+                            <option value="DENTISTRY AND DENTAL SURGERY">DENTISTRY AND DENTAL SURGERY</option>
+                            <option value="DRAMA/DRAMATIC/PERFORMING ARTS">DRAMA/DRAMATIC/PERFORMING ARTS</option>
+                            <option value="ECONOMICS">ECONOMICS</option>
+                            <option value="EDUCATION AND BIOLOGY">EDUCATION AND BIOLOGY</option>
+                            <option value="EDUCATION AND CHEMISTRY">EDUCATION AND CHEMISTRY</option>
+                            <option value="EDUCATION AND ECONOMICS">EDUCATION AND ECONOMICS</option>
+                            <option value="EDUCATION AND ENGLISH LANGUAGE">EDUCATION AND ENGLISH LANGUAGE</option>
+                            <option value="EDUCATION AND FRENCH">EDUCATION AND FRENCH</option>
+                            <option value="EDUCATION AND GEOGRAPHY">EDUCATION AND GEOGRAPHY</option>
+                            <option value="EDUCATION AND HISTORY">EDUCATION AND HISTORY</option>
+                            <option value="EDUCATION AND INTEGRATED SCIENCE">EDUCATION AND INTEGRATED SCIENCE</option>
+                            <option value="EDUCATION AND LANGUAGE ARTS">EDUCATION AND LANGUAGE ARTS</option>
+                            <option value="EDUCATION AND MATHEMATICS">EDUCATION AND MATHEMATICS</option>
+                            <option value="EDUCATION AND MUSIC">EDUCATION AND MUSIC</option>
+                            <option value="EDUCATION AND PHYSICS">EDUCATION AND PHYSICS</option>
+                            <option value="EDUCATION AND POLITICAL SCIENCE">EDUCATION AND POLITICAL SCIENCE</option>
+                            <option value="EDUCATION AND RELIGIOUS STUDIES">EDUCATION AND RELIGIOUS STUDIES</option>
+                            <option value="EDUCATION AND SOCIAL STUDIES">EDUCATION AND SOCIAL STUDIES</option>
+                            <option value="EDUCATION AND YORUBA">EDUCATION AND YORUBA</option>
+                            <option value="EDUCATION FINE AND APPLIED ARTS">EDUCATION FINE AND APPLIED ARTS</option>
+                            <option value="EDUCATIONAL MANAGEMENT">EDUCATIONAL MANAGEMENT</option>
+                            <option value="ELECTRICAL/ELECTRONICS ENGINEERING">ELECTRICAL/ELECTRONICS ENGINEERING</option>
+                            <option value="ENGINEERING PHYSICS">ENGINEERING PHYSICS</option>
+                            <option value="ENGLISH LANGUAGE">ENGLISH LANGUAGE</option>
+                            <option value="ENTREPRENEURSHIP">ENTREPRENEURSHIP</option>
+                            <option value="ESTATE MANAGEMENT">ESTATE MANAGEMENT</option>
+                            <option value="FAMILY NUTRITION AND CONSUMER SCIENCES">FAMILY NUTRITION AND CONSUMER SCIENCES</option>
+                            <option value="FOOD SCIENCE AND TECHNOLOGY">FOOD SCIENCE AND TECHNOLOGY</option>
+                            <option value="FRENCH">FRENCH</option>
+                            <option value="GEOGRAPHY">GEOGRAPHY</option>
+                            <option value="GEOLOGY">GEOLOGY</option>
+                            <option value="GERMAN">GERMAN</option>
+                            <option value="GUIDANCE AND COUNSELLING">GUIDANCE AND COUNSELLING</option>
+                            <option value="HEALTH EDUCATION">HEALTH EDUCATION</option>
+                            <option value="HISTORY">HISTORY</option>
+                            <option value="HOME ECONOMICS AND EDUCATION">HOME ECONOMICS AND EDUCATION</option>
+                            <option value="INDUSTRIAL CHEMISTRY">INDUSTRIAL CHEMISTRY</option>
+                            <option value="INSURANCE AND ACTUARIAL SCIENCE">INSURANCE AND ACTUARIAL SCIENCE</option>
+                            <option value="INTERNATIONAL RELATIONS">INTERNATIONAL RELATIONS</option>
+                            <option value="LINGUISTICS">LINGUISTICS</option>
+                            <option value="LINGUISTICS AND AFRICAN LANGUAGES">LINGUISTICS AND AFRICAN LANGUAGES</option>
+                            <option value="LITERATURE IN ENGLISH">LITERATURE IN ENGLISH</option>
+                            <option value="LOCAL GOVERNMENT STUDIES">LOCAL GOVERNMENT STUDIES</option>
+                            <option value="MATHEMATICS">MATHEMATICS</option>
+                            <option value="MECHANICAL ENGINEERING">MECHANICAL ENGINEERING</option>
+                            <option value="MEDICAL REHABILITATION">MEDICAL REHABILITATION</option>
+                            <option value="MEDICINE AND SURGERY">MEDICINE AND SURGERY</option>
+                            <option value="METALLURGICAL AND MATERIAL ENGINEERING">METALLURGICAL AND MATERIAL ENGINEERING</option>
+                            <option value="MICROBIOLOGY">MICROBIOLOGY</option>
+                            <option value="MUSIC">MUSIC</option>
+                            <option value="NURSING/NURSING SCEINCE">NURSING/NURSING SCEINCE</option>
+                            <option value="NUTRITION AND CONSUMERS SERVICES">NUTRITION AND CONSUMERS SERVICES</option>
+                            <option value="PHARMACY">PHARMACY</option>
+                            <option value="PHILOSOPHY">PHILOSOPHY</option>
+                            <option value="PHYSICAL AND HEALTH EDUCATION">PHYSICAL AND HEALTH EDUCATION</option>
+                            <option value="PHYSICS">PHYSICS</option>
+                            <option value="POLITICAL SCIENCE">POLITICAL SCIENCE</option>
+                            <option value="PORTUGUESE">PORTUGUESE</option>
+                            <option value="PSYCHOLOGY">PSYCHOLOGY</option>
+                            <option value="PUBLIC ADMINISTRATION">PUBLIC ADMINISTRATION</option>
+                            <option value="QUANTITY SURVEYING">QUANTITY SURVEYING</option>
+                            <option value="RELIGIOUS STUDIES">RELIGIOUS STUDIES</option>
+                            <option value="SOCIOLOGY AND ANTHROPLOGY">SOCIOLOGY AND ANTHROPLOGY</option>
+                            <option value="SOIL SCIENCE">SOIL SCIENCE</option>
+                            <option value="STATISTICS">STATISTICS</option>
+                            <option value="SURVEYING AND GEOINFORMATICS">SURVEYING AND GEOINFORMATICS</option>
+                            <option value="URBAN AND REGIONAL PLANNING">URBAN AND REGIONAL PLANNING</option>
+                            <option value="YORUBA">YORUBA</option>
+                            <option value="ZOOLOGY">ZOOLOGY</option>
                         </select>
                     </div>
                 </div>
@@ -114,10 +182,7 @@
                 <!-- RFID Card -->
                 <div class="form-group">
                     <label for="cardUID">RFID Card UID</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="cardUID" name="cardUID" placeholder="Click scan to get RFID card UID" readonly style="flex: 1;">
-                        <button type="button" class="btn btn-secondary" onclick="scanRFID()">🏷️ Scan RFID</button>
-                    </div>
+                    <input type="text" id="cardUID" name="cardUID" placeholder="Enter RFID card UID" required>
                 </div>
 
                 <!-- Fingerprint -->

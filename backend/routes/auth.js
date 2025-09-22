@@ -5,13 +5,15 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const jwt = require('jsonwebtoken');
 
+// =====================
 // Register
+// =====================
 router.post('/register', (req, res) => {
   const {
     fullName,
     email,
     role,
-    rfidCardUID,
+    rfidUID,
     fingerprintData,
     matricNumber,
     faculty,
@@ -21,9 +23,9 @@ router.post('/register', (req, res) => {
   } = req.body;
 
   // Basic validation
-  if (!fullName || !email || !role || !rfidCardUID || !fingerprintData) {
+  if (!fullName || !email || !role || !rfidUID || !fingerprintData) {
     return res.status(400).json({
-      error: 'Missing required fields: fullName, email, role, rfidCardUID, fingerprintData'
+      error: 'Missing required fields: fullName, email, role, rfidUID, fingerprintData'
     });
   }
 
@@ -43,12 +45,12 @@ router.post('/register', (req, res) => {
   }
 
   try {
-    // Check if user exists by email or rfid or fingerprint
+    // Check if user exists by email OR rfid_uid OR fingerprint_data
     const stmtCheck = db.prepare(`
       SELECT * FROM users 
-      WHERE email = ? OR rfidCardUID = ? OR fingerprintData = ?
+      WHERE email = ? OR rfid_uid = ? OR fingerprint_data = ?
     `);
-    const existing = stmtCheck.get(email, rfidCardUID, fingerprintData);
+    const existing = stmtCheck.get(email, rfidUID, fingerprintData);
     if (existing) {
       return res.status(400).json({
         error: 'User with same email, RFID, or fingerprint already exists'
@@ -60,15 +62,24 @@ router.post('/register', (req, res) => {
 
     const stmtInsert = db.prepare(`
       INSERT INTO users (
-        id, fullName, email, role, rfidCardUID, fingerprintData,
-        matricNumber, faculty, department, staffId, designation, createdAt
+        id, full_name, email, role, rfid_uid, fingerprint_data,
+        matric_number, faculty, department, staff_id, designation, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     stmtInsert.run(
-      id, fullName, email, role, rfidCardUID, fingerprintData,
-      matricNumber || null, faculty || null, department || null,
-      staffId || null, designation || null, createdAt
+      id,
+      fullName,
+      email,
+      role,
+      rfidUID,
+      fingerprintData,
+      matricNumber || null,
+      faculty || null,
+      department || null,
+      staffId || null,
+      designation || null,
+      createdAt
     );
 
     res.status(201).json({
@@ -82,7 +93,9 @@ router.post('/register', (req, res) => {
   }
 });
 
+// =====================
 // Login (teacher only)
+// =====================
 router.post('/login', (req, res) => {
   const { email, fingerprintData } = req.body;
   if (!email || !fingerprintData) {
@@ -98,13 +111,13 @@ router.post('/login', (req, res) => {
     if (user.role !== 'teacher') {
       return res.status(401).json({ error: 'Only teachers can login to the dashboard' });
     }
-    if (user.fingerprintData !== fingerprintData) {
+    if (user.fingerprint_data !== fingerprintData) {
       return res.status(401).json({ error: 'Invalid email or fingerprint' });
     }
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      req.jwtSecret,
+      process.env.JWT_SECRET || 'your_super_secret_jwt',
       { expiresIn: '24h' }
     );
 
@@ -113,10 +126,10 @@ router.post('/login', (req, res) => {
       token,
       user: {
         id: user.id,
-        fullName: user.fullName,
+        fullName: user.full_name,
         email: user.email,
         role: user.role,
-        staffId: user.staffId,
+        staffId: user.staff_id,
         designation: user.designation
       }
     });
