@@ -2,124 +2,94 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const User = require('../models/User');         // ✅ MongoDB User model
-const Attendance = require('../models/Attendance'); // ✅ MongoDB Attendance model
+const db = require('../db');
 
-// ==================== RFID VERIFICATION ====================
-router.post('/verify-rfid', async (req, res) => {
-    try {
-        const { rfid_uid } = req.body;
-        console.log(`ESP32 RFID Check: ${rfid_uid}`);
+// Verify RFID
+router.post('/verify-rfid', (req, res) => {
+  const { rfid_uid } = req.body;
+  if (!rfid_uid) {
+    return res.status(400).json({ success: false, error: 'RFID UID is required' });
+  }
 
-        if (!rfid_uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'RFID UID is required'
-            });
-        }
-
-        // Look up user in MongoDB
-        const user = await User.findOne({ rfidCardUID: rfid_uid });
-        if (!user) {
-            console.log(`RFID not found: ${rfid_uid}`);
-            return res.status(404).json({
-                success: false,
-                error: 'RFID card not registered'
-            });
-        }
-
-        console.log(`✅ RFID verified: ${user.fullName} (${rfid_uid})`);
-
-        // Send response in ESP32 expected format
-        res.json({
-            success: true,
-            student_name: user.fullName,
-            user_id: user.id,
-            matricNumber: user.matricNumber || user.staffId,
-            role: user.role,
-            fingerprint_data: user.fingerprintData
-        });
-
-    } catch (error) {
-        console.error('❌ RFID verification error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
+  try {
+    const stmt = db.prepare(`SELECT * FROM users WHERE rfidCardUID = ?`);
+    const user = stmt.get(rfid_uid);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'RFID card not registered' });
     }
-});
-
-// ==================== ATTENDANCE LOGGING ====================
-router.post('/log-attendance', async (req, res) => {
-    try {
-        const { student_name, rfid_uid, timestamp, device_id } = req.body;
-        console.log(`ESP32 Attendance Log: ${student_name} (${rfid_uid}) from ${device_id}`);
-
-        if (!student_name || !rfid_uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'Student name and RFID UID are required'
-            });
-        }
-
-        // Find user
-        const user = await User.findOne({ rfidCardUID: rfid_uid });
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            });
-        }
-
-        // Create attendance record in MongoDB
-        const attendanceId = uuidv4();
-        const ts = timestamp ? new Date(parseInt(timestamp)) : new Date();
-
-        const newAttendance = new Attendance({
-            id: attendanceId,
-            userId: user.id,
-            rfidCardUID: rfid_uid,
-            action: 'ENTRY',
-            location: device_id || 'Unknown Device',
-            deviceId: device_id,
-            timestamp: ts,
-            verified: true
-        });
-
-        await newAttendance.save();
-
-        console.log(`✅ Attendance logged from ${device_id}: ${student_name} at ${ts}`);
-
-        res.json({
-            success: true,
-            message: 'Attendance logged successfully',
-            timestamp: ts,
-            user_id: user.id,
-            student_name: user.fullName
-        });
-
-    } catch (error) {
-        console.error('❌ Attendance logging error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
-    }
-});
-
-// ==================== DEVICE REGISTRATION ====================
-router.post('/device/register', (req, res) => {
-    const { device_id, device_type, location } = req.body;
-
-    console.log(`ESP32 Device Registration: ${device_id} at ${location}`);
 
     res.json({
-        success: true,
-        device_id: device_id || 'ESP32_001',
-        registered: true,
-        server_time: new Date().toISOString(),
-        message: 'Device registered successfully'
+      success: true,
+      student_name: user.fullName,
+      user_id: user.id,
+      matricNumber: user.matricNumber || user.staffId,
+      role: user.role,
+      fingerprint_data: user.fingerprintData
     });
+
+  } catch (err) {
+    console.error('Verify RFID error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Log attendance
+router.post('/log-attendance', (req, res) => {
+  const { student_name, rfid_uid, timestamp, device_id } = req.body;
+  if (!student_name || !rfid_uid) {
+    return res.status(400).json({ success: false, error: 'Student name and RFID UID are required' });
+  }
+
+  try {
+    const stmtUser = db.prepare(`SELECT * FROM users WHERE rfidCardUID = ?`);
+    const user = stmtUser.get(rfid_uid);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const id = uuidv4();
+    const ts = timestamp ? new Date(parseInt(timestamp)).toISOString() : new Date().toISOString();
+
+    const stmtInsert = db.prepare(`
+      INSERT INTO attendance (
+        id, userId, rfidCardUID, timestamp, action, location, deviceId, verified
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmtInsert.run(
+      id,
+      user.id,
+      rfid_uid,
+      ts,
+      'ENTRY',
+      device_id || 'Unknown Device',
+      device_id || null,
+      1
+    );
+
+    res.json({
+      success: true,
+      message: 'Attendance logged successfully',
+      timestamp: ts,
+      user_id: user.id,
+      student_name: user.fullName
+    });
+
+  } catch (err) {
+    console.error('Log attendance error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Device registration
+router.post('/device/register', (req, res) => {
+  const { device_id, device_type, location } = req.body;
+  res.json({
+    success: true,
+    device_id: device_id || 'ESP32_001',
+    registered: true,
+    server_time: new Date().toISOString(),
+    message: 'Device registered successfully'
+  });
 });
 
 module.exports = router;

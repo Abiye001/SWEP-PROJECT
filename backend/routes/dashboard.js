@@ -1,135 +1,121 @@
+// routes/dashboard.js
 const express = require('express');
 const router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-const pool = require('../db');
+const db = require('../db');
 
-// RFID verification endpoint (ESP32 format)
-router.post('/verify-rfid', async (req, res) => {
-    try {
-        const { rfid_uid } = req.body;
-        console.log(`ESP32 RFID Check: ${rfid_uid}`);
+// Dashboard stats (teachers only)
+router.get('/stats', (req, res) => {
+  if (!req.user || req.user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Access denied. Teachers only.' });
+  }
 
-        if (!rfid_uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'RFID UID is required'
-            });
-        }
+  try {
+    // Count students
+    const stmtStudents = db.prepare(`SELECT COUNT(*) AS count FROM users WHERE role = 'student'`);
+    const totalStudents = stmtStudents.get().count;
 
-        // Look up user in DB
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE rfid_uid = ?",
-            [rfid_uid]
-        );
-        if (rows.length === 0) {
-            console.log(`RFID not found: ${rfid_uid}`);
-            return res.status(404).json({
-                success: false,
-                error: 'RFID card not registered'
-            });
-        }
+    // Count teachers
+    const stmtTeachers = db.prepare(`SELECT COUNT(*) AS count FROM users WHERE role = 'teacher'`);
+    const totalTeachers = stmtTeachers.get().count;
 
-        const user = rows[0];
-        console.log(`RFID verified: ${user.full_name} (${rfid_uid})`);
+    // Total attendance
+    const stmtTotalAtt = db.prepare(`SELECT COUNT(*) AS count FROM attendance WHERE verified = 1`);
+    const totalAttendance = stmtTotalAtt.get().count;
 
-        // Send response in ESP32 expected format
-        res.json({
-            success: true,
-            student_name: user.full_name,
-            user_id: user.id,
-            matricNumber: user.matric_number || user.staff_id,
-            role: user.role,
-            fingerprint_data: user.fingerprint_data
-        });
+    // Today’s attendance
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth()+1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayDate = `${yyyy}-${mm}-${dd}`;  // format "YYYY-MM-DD"
 
-    } catch (error) {
-        console.error('RFID verification error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
-    }
-});
-
-// Attendance logging endpoint (ESP32 format)
-router.post('/log-attendance', async (req, res) => {
-    try {
-        const { student_name, rfid_uid, timestamp, device_id } = req.body;
-        console.log(`ESP32 Attendance Log: ${student_name} (${rfid_uid}) from ${device_id}`);
-
-        if (!student_name || !rfid_uid) {
-            return res.status(400).json({
-                success: false,
-                error: 'Student name and RFID UID are required'
-            });
-        }
-
-        // Find user
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE rfid_uid = ?",
-            [rfid_uid]
-        );
-        if (rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found'
-            });
-        }
-
-        const user = rows[0];
-
-        // Create attendance record in DB
-        const attendanceId = uuidv4();
-        const ts = timestamp ? new Date(parseInt(timestamp)) : new Date();
-
-        await pool.query(
-            `INSERT INTO attendance 
-            (id, user_id, rfid_uid, action, location, device_id, timestamp, verified) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                attendanceId,
-                user.id,
-                rfid_uid,
-                'ENTRY',
-                device_id || 'Unknown Device',
-                device_id,
-                ts,
-                true
-            ]
-        );
-
-        console.log(`Attendance logged from ${device_id}: ${student_name} at ${ts}`);
-
-        res.json({
-            success: true,
-            message: 'Attendance logged successfully',
-            timestamp: ts,
-            user_id: user.id,
-            student_name: user.full_name
-        });
-
-    } catch (error) {
-        console.error('Attendance logging error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
-        });
-    }
-});
-
-// ESP32 device registration/check endpoint
-router.post('/device/register', (req, res) => {
-    const { device_id, device_type, location } = req.body;
-
-    console.log(`ESP32 Device Registration: ${device_id} at ${location}`);
+    const stmtToday = db.prepare(`
+      SELECT COUNT(*) AS count FROM attendance 
+      WHERE verified = 1 AND date(timestamp) = ?
+    `);
+    const todayAttendance = stmtToday.get(todayDate).count;
 
     res.json({
-        success: true,
-        device_id: device_id || 'ESP32_001',
-        registered: true,
-        server_time: new Date().toISOString(),
-        message: 'Device registered successfully'
+      totalStudents,
+      totalTeachers,
+      todayAttendance,
+      totalAttendance,
+      systemStatus: 'online'
     });
+
+  } catch (err) {
+    console.error('Dashboard stats error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/attendance', (req, res) => {
+  if (!req.user || req.user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Access denied. Teachers only.' });
+  }
+
+  const limit = parseInt(req.query.limit) || 50;
+  const offset = parseInt(req.query.offset) || 0;
+  const dateFilter = req.query.date;  // expects "YYYY-MM-DD"
+
+  try {
+    let query = `SELECT a.*, u.fullName, u.email FROM attendance a
+                 JOIN users u ON a.userId = u.id`;
+    const params = [];
+
+    if (dateFilter) {
+      query += ` WHERE date(a.timestamp) = ?`;
+      params.push(dateFilter);
+    }
+
+    query += ` ORDER BY a.timestamp DESC LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    const stmt = db.prepare(query);
+    const attendanceRows = stmt.all(...params);
+
+    // Count total records (with same filter if dateFilter provided)
+    let countQuery = `SELECT COUNT(*) AS count FROM attendance`;
+    const countParams = [];
+    if (dateFilter) {
+      countQuery += ` WHERE date(timestamp) = ?`;
+      countParams.push(dateFilter);
+    }
+    const stmtCount = db.prepare(countQuery);
+    const total = stmtCount.get(...countParams).count;
+
+    res.json({
+      attendance: attendanceRows,
+      total,
+      limit,
+      offset
+    });
+  } catch (err) {
+    console.error('Get attendance error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/users', (req, res) => {
+  if (!req.user || req.user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Access denied. Teachers only.' });
+  }
+
+  try {
+    const stmt = db.prepare(`
+      SELECT id, fullName, email, role, matricNumber, staffId, rfidCardUID, createdAt FROM users
+      ORDER BY createdAt DESC
+    `);
+    const usersRows = stmt.all();
+
+    res.json({
+      users: usersRows,
+      total: usersRows.length
+    });
+  } catch (err) {
+    console.error('Get users error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router;
