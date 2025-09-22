@@ -464,7 +464,7 @@ async function handleRegistration(e) {
         fullName: formData.get('fullName'),
         email: formData.get('email'),
         role: formData.get('role'),
-        rfidCardUID: formData.get('cardUID'),
+        rfidUID: formData.get('cardUID'),
         fingerprintData: registeredFingerprintData
     };
 
