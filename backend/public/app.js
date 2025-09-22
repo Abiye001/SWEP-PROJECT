@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:3050/api';
+const API_BASE_URL = 'https://swep-project.onrender.com/api';
 let authToken = null;
 
 // API Helper Class
